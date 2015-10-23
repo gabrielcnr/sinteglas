@@ -28,3 +28,11 @@ class SinteglasOrderController(Atom):
     def now(self):
         return datetime.datetime.now()
 
+    def conclude_order(self, order):
+        order.delivery_date = self.now().date()
+        self.session.add(order)
+        self.session.commit()
+
+    def delete_order(self, order):
+        self.session.delete(order)
+        self.session.commit()
