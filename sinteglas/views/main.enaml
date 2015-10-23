@@ -1,6 +1,7 @@
 from enaml.widgets.api import *
 from enaml.layout.api import *
 import sinteglas
+from sinteglas.views.view_order import OrderDialog
 
 enamldef Main(MainWindow):
     attr controller
@@ -24,6 +25,11 @@ enamldef Main(MainWindow):
 
             PushButton: btn_new:
                 text = 'New'
+                clicked ::
+                    dlg = OrderDialog()
+                    if dlg.exec_():
+                        controller.save_new_order()
+
 
             PushButton: btn_edit:
                 text = 'Edit'

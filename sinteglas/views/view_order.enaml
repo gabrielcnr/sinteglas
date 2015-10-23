@@ -1,0 +1,67 @@
+from enaml.widgets.api import *
+from enaml.layout.api import *
+from sinteglas.model import OrderParams
+
+_Field = Field
+enamldef Field(_Field):
+    submit_triggers = ['return_pressed', 'auto_sync', 'lost_focus']
+
+
+enamldef OrderDialog(Dialog):
+    attr order_params
+
+    title = 'New Order'
+
+    initialized ::
+        if nonlocals.order_params is None:
+            nonlocals.order_params = OrderParams.new()
+
+    Container:
+
+        Form: form:
+
+            Label:
+                text = 'Client'
+
+            Field:
+                text := order_params.client
+
+
+            Label:
+                text = 'Description'
+
+            MultilineField:
+                text := order_params.description
+
+
+            Label:
+                text = 'Estimated Delivery Date'
+
+            DateSelector:
+                date := order_params.estimated_delivery_date
+                calendar_popup = True
+
+        Container: btn_box:
+            constraints = [hbox(spacer, btn_ok, btn_cancel),
+                           btn_ok.width == btn_cancel.width]
+
+            PushButton: btn_ok:
+                text = 'OK'
+                enabled << order_params.is_valid
+                clicked ::
+                    accept()
+
+            PushButton: btn_cancel:
+                text = 'Cancel'
+                clicked ::
+                    reject()
+
+
+
+enamldef Main(Window):
+    Container:
+        PushButton:
+            text = 'Test Dialog'
+            clicked ::
+                dlg = OrderDialog()
+                dlg.exec_()

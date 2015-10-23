@@ -3,8 +3,8 @@ from atom.api import *
 import datetime
 from sinteglas.model import Order, OrderParams
 
-class SinteglasOrderController(Atom):
 
+class SinteglasOrderController(Atom):
     session = Value()
 
     def save_new_order(self, order_params):
