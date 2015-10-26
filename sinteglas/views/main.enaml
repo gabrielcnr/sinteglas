@@ -27,6 +27,10 @@ enamldef Main(MainWindow):
 
     initial_size = (1024, 728)
 
+    initialized ::
+        self.center_on_screen()
+        nonlocals.controller.load_orders()
+
     MenuBar:
         pass
 
@@ -35,23 +39,28 @@ enamldef Main(MainWindow):
         GroupBox:
 
             constraints << [
-                hbox(btn_new, btn_edit, btn_delete, spacer, btn_reports,  btn_refresh),
+                hbox(btn_new, btn_edit, btn_delete, chk_show_closed, spacer, btn_reports,  btn_refresh),
                 btn_new.width == btn_edit.width == btn_delete.width == btn_refresh.width, btn_refresh.width == btn_reports.width,
+                align('v_center', btn_new, btn_edit, btn_delete, chk_show_closed, btn_refresh, btn_reports),
             ]
 
             PushButton: btn_new:
                 text = 'New'
                 clicked ::
                     dlg = OrderDialog()
+                    dlg.center_on_screen()
                     if dlg.exec_():
-                        controller.save_new_order()
-
+                        controller.save_new_order(dlg.order_params)
 
             PushButton: btn_edit:
                 text = 'Edit'
 
             PushButton: btn_delete:
                 text = 'Delete'
+
+            CheckBox: chk_show_closed:
+                text = 'Show Closed Orders'
+                checked := controller.show_closed
 
             PushButton: btn_reports:
                 text = 'Reports'
@@ -79,9 +88,21 @@ enamldef Main(MainWindow):
 
             alternate_row_colors = True
             stretch_last_column = True
+            row_style_callback = row_style_callback
 
 
     StatusBar:
         pass
 
 
+
+
+def row_style_callback(row, row_index, role):
+    from PyQt4.QtGui import *
+    from PyQt4.QtCore import *
+    import datetime
+    if role == Qt.ForegroundRole:
+        if row.estimated_delivery_date <= datetime.date.today():
+            return QColor(Qt.red)
+        else:
+            return QColor(Qt.darkGreen)

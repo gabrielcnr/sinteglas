@@ -9,6 +9,8 @@ class SinteglasOrderController(Atom):
 
     orders = List()
 
+    show_closed = Bool()
+
     def save_new_order(self, order_params):
         new_order = Order(
             created_date=self.now(),
@@ -42,6 +44,9 @@ class SinteglasOrderController(Atom):
     def load_orders(self):
         query = self.session.query(Order)
         self.orders = query.all()
+
+
+class DemoSinteglasOrderController(SinteglasOrderController):
 
     def populate_demo_database(self):
         # 2 orders delayed
