@@ -2,6 +2,23 @@ from enaml.widgets.api import *
 from enaml.layout.api import *
 import sinteglas
 from sinteglas.views.view_order import OrderDialog
+from enamlext.widgets import Table, Column
+
+
+def format_date(dt):
+    return format_dt(dt, '%d/%m/%Y')
+
+
+def format_datetime(dt):
+    return format_dt(dt, '%d/%m/%Y %H:%M')
+
+
+def format_dt(dt, fmt):
+    if dt is not None:
+        return dt.strftime(fmt)
+    else:
+        return ''
+
 
 enamldef Main(MainWindow):
     attr controller
@@ -9,7 +26,6 @@ enamldef Main(MainWindow):
     title = 'Sinteglas %s' % sinteglas.version
 
     initial_size = (1024, 728)
-
 
     MenuBar:
         pass
@@ -19,8 +35,8 @@ enamldef Main(MainWindow):
         GroupBox:
 
             constraints << [
-                hbox(btn_new, btn_edit, btn_delete, spacer, btn_refresh),
-                btn_new.width == btn_edit.width == btn_delete.width == btn_refresh.width,
+                hbox(btn_new, btn_edit, btn_delete, spacer, btn_reports,  btn_refresh),
+                btn_new.width == btn_edit.width == btn_delete.width == btn_refresh.width, btn_refresh.width == btn_reports.width,
             ]
 
             PushButton: btn_new:
@@ -37,8 +53,33 @@ enamldef Main(MainWindow):
             PushButton: btn_delete:
                 text = 'Delete'
 
+            PushButton: btn_reports:
+                text = 'Reports'
+                clicked ::
+                    print text
+
             PushButton: btn_refresh:
                 text = 'Refresh'
+                clicked ::
+                    controller.load_orders()
+
+        Table: table:
+            columns = [
+                Column('Estimated Delivery Date', 'estimated_delivery_date',
+                       formatter=format_date),
+                Column('Delivery Date', 'delivery_date',
+                       formatter=format_date,),
+                Column('Client', 'client'),
+                Column('Created By', 'created_by'),
+                Column('Created Date', 'created_date',
+                       formatter=format_datetime),
+                Column('Description', 'description'),
+            ]
+            rows << controller.orders
+
+            alternate_row_colors = True
+            stretch_last_column = True
+
 
     StatusBar:
         pass

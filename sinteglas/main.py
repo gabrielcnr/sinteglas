@@ -11,6 +11,7 @@ def main():
     app = QtApplication()
     session = create_database_session()
     controller = SinteglasOrderController(session=session)
+    controller.populate_demo_database()
     view = Main(controller=controller)
     view.show()
     app.start()
