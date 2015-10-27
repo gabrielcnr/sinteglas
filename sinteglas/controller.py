@@ -128,5 +128,18 @@ class DemoSinteglasOrderController(SinteglasOrderController):
 
         fig1 = Figure()
         ax1 = fig1.add_subplot(111)
-        ax1.plot([1, 2, 3])
+
+        # The slices will be ordered and plotted counter-clockwise.
+        labels = 'On-Time', 'Delayed'
+        sizes = [self.count_open_orders-self.count_open_delayed_orders,
+                 self.count_open_delayed_orders]
+        colors = ['limegreen', 'crimson']
+        explode = (0, 0.1)
+
+        ax1.pie(sizes, explode=explode, labels=labels, colors=colors,
+                autopct='%1.1f%%', shadow=True, startangle=90)
+        # Set aspect ratio to be equal so that pie is drawn as a circle.
+        ax1.axis('equal')
+
         return fig1
+
