@@ -33,6 +33,9 @@ class Order(Base):
     def _now(self):
         return datetime.datetime.now()
 
+    def is_open(self):
+        return self.delivery_date is None
+
 
 class OrderParams(Atom):
     client = Str()

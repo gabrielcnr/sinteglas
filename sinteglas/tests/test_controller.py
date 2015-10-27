@@ -1,5 +1,6 @@
 import datetime
-from sinteglas.controller import SinteglasOrderController
+from sinteglas.controller import SinteglasOrderController, \
+    DemoSinteglasOrderController
 from sinteglas.model import create_database_session, Order
 import mock
 import pytest
@@ -62,3 +63,30 @@ def test_delete_order(controller):
     controller.delete_order(order)
 
     [] == controller.session.query(Order).all()
+
+
+def test_show_closed():
+    session = create_database_session()
+    controller = DemoSinteglasOrderController(session=session)
+    controller.populate_demo_database()
+    controller.load_orders()
+
+    # Default should be do not show closed orders
+    assert len(controller.orders) == 7
+    assert len(controller.visible_orders) == 4
+
+    controller.show_closed = True
+    assert len(controller.visible_orders) == 7
+
+
+def test_counts():
+    session = create_database_session()
+    controller = DemoSinteglasOrderController(session=session)
+    controller.populate_demo_database()
+    controller.load_orders()
+
+    assert len(controller.orders) == 7
+    assert controller.count_open_orders == 4
+    assert controller.count_closed_orders == 3
+    assert controller.count_open_delayed_orders == 2
+    assert controller.count_open_ontime_orders == 2

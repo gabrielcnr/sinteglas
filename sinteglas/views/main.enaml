@@ -2,8 +2,7 @@ from enaml.widgets.api import *
 from enaml.layout.api import *
 import sinteglas
 from sinteglas.views.view_order import OrderDialog
-from enamlext.widgets import Table, Column
-
+from enamlext.widgets import Table, Column, ask_yes_no
 
 def format_date(dt):
     return format_dt(dt, '%d/%m/%Y')
@@ -57,6 +56,11 @@ enamldef Main(MainWindow):
 
             PushButton: btn_delete:
                 text = 'Delete'
+                clicked ::
+                    if ask_yes_no('Delete Confirmation',
+                                  'Are you sure you want to delete this order?',
+                                  parent=self):
+                        print 'yeahhhhhh'
 
             CheckBox: chk_show_closed:
                 text = 'Show Closed Orders'
@@ -84,7 +88,7 @@ enamldef Main(MainWindow):
                        formatter=format_datetime),
                 Column('Description', 'description'),
             ]
-            rows << controller.orders
+            rows << controller.visible_orders
 
             alternate_row_colors = True
             stretch_last_column = True
@@ -92,8 +96,17 @@ enamldef Main(MainWindow):
 
 
     StatusBar:
-        pass
+        StatusItem:
+            Label:
+                text << 'Total: {}'.format(len(controller.orders))
 
+        StatusItem:
+            Label:
+                text << 'Open/Delayed: {}'.format(controller.count_open_delayed_orders)
+
+        StatusItem:
+            Label:
+                text << 'Open/OnTime: {}'.format(controller.count_open_ontime_orders)
 
 
 
@@ -102,7 +115,14 @@ def row_style_callback(row, row_index, role):
     from PyQt4.QtCore import *
     import datetime
     if role == Qt.ForegroundRole:
-        if row.estimated_delivery_date <= datetime.date.today():
-            return QColor(Qt.red)
+        if row.is_open():
+            if row.estimated_delivery_date <= datetime.date.today():
+                return QColor(Qt.red)
+            else:
+                return QColor(Qt.darkGreen)
         else:
-            return QColor(Qt.darkGreen)
+            if row.estimated_delivery_date < row.delivery_date:
+                return QColor(Qt.red)
+            else:
+                return QColor(Qt.darkGreen)
+

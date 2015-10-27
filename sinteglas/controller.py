@@ -11,6 +11,13 @@ class SinteglasOrderController(Atom):
 
     show_closed = Bool()
 
+    visible_orders = List()
+
+    count_open_orders = Int()
+    count_closed_orders = Int()
+    count_open_delayed_orders = Int()
+    count_open_ontime_orders = Int()
+
     def save_new_order(self, order_params):
         new_order = Order(
             created_date=self.now(),
@@ -45,45 +52,63 @@ class SinteglasOrderController(Atom):
         query = self.session.query(Order)
         self.orders = query.all()
 
+    @observe(['orders', 'show_closed'])
+    def update_visible_orders(self, change=None):
+        if not self.show_closed:
+            self.visible_orders = [o for o in self.orders if o.is_open()]
+        else:
+            self.visible_orders = self.orders[:]
+
+    @observe(['orders'])
+    def update_counts(self, change=None):
+        self.count_open_orders = sum((1 for o in self.orders
+                                      if o.is_open()), 0)
+        self.count_closed_orders = len(self.orders) - self.count_open_orders
+        self.count_open_delayed_orders = sum((1 for o in self.orders
+                                              if o.is_open() and
+                                              o.status == 'DELAYED'), 0)
+
+        self.count_open_ontime_orders = (
+            self.count_open_orders - self.count_open_delayed_orders)
+
 
 class DemoSinteglasOrderController(SinteglasOrderController):
-
     def populate_demo_database(self):
         # 2 orders delayed
         self.mk_order(client='Batman', description='2 chapa',
-                  estimated_delivery_date=self.mk_date(-1),
-                  created_date=self.mk_date(-11),
-                  created_by='Seu Fabio')
+                      estimated_delivery_date=self.mk_date(-1),
+                      created_date=self.mk_date(-11),
+                      created_by='Seu Fabio')
         self.mk_order(client='Spiderman', description='1 chapa',
-                  estimated_delivery_date=self.mk_date(-3),
-                  created_date=self.mk_date(-8),
-                  created_by='Du Fiasco')
+                      estimated_delivery_date=self.mk_date(-3),
+                      created_date=self.mk_date(-8),
+                      created_by='Du Fiasco')
         # 2 orders on time
         self.mk_order(client='IronMan', description='100 mascara',
-                  estimated_delivery_date=self.mk_date(+2),
-                  created_date=self.mk_date(-5),
-                  created_by='Seu Fabio')
+                      estimated_delivery_date=self.mk_date(+2),
+                      created_date=self.mk_date(-5),
+                      created_by='Seu Fabio')
         self.mk_order(client='Dilma', description='1 rola x-large',
-                  estimated_delivery_date=self.mk_date(+7),
-                  created_date=self.mk_date(-6),
-                  created_by='Du Fiasco')
+                      estimated_delivery_date=self.mk_date(+7),
+                      created_date=self.mk_date(-6),
+                      created_by='Du Fiasco')
         # 2 orders closed on time
         self.mk_order(client='IronMan', description='20 mascara',
-                  estimated_delivery_date=self.mk_date(-7),
-                  delivery_date=self.mk_date(-9),
-                  created_date=self.mk_date(-15),
-                  created_by='Estenio Cavalari')
+                      estimated_delivery_date=self.mk_date(-7),
+                      delivery_date=self.mk_date(-9),
+                      created_date=self.mk_date(-15),
+                      created_by='Estenio Cavalari')
         self.mk_order(client='Batman', description='125 Batchapacrilica',
-                  estimated_delivery_date=self.mk_date(+1),
-                  delivery_date=self.mk_date(-1),
-                  created_date=self.mk_date(-6),
-                  created_by='Du Fiasco')
+                      estimated_delivery_date=self.mk_date(+1),
+                      delivery_date=self.mk_date(-1),
+                      created_date=self.mk_date(-6),
+                      created_by='Du Fiasco')
         # 2 orders closed delayed
         self.mk_order(client='Dilma', description='240 algemas acrilicas',
-                  estimated_delivery_date=self.mk_date(-3),
-                  delivery_date=self.mk_date(-1),
-                  created_date=self.mk_date(-16),
-                  created_by='Du Fiasco')
+                      estimated_delivery_date=self.mk_date(-3),
+                      delivery_date=self.mk_date(-1),
+                      created_date=self.mk_date(-16),
+                      created_by='Du Fiasco')
 
         self.session.commit()
 
@@ -93,4 +118,3 @@ class DemoSinteglasOrderController(SinteglasOrderController):
     def mk_order(self, **kwargs):
         o = Order(**kwargs)
         self.session.add(o)
-
