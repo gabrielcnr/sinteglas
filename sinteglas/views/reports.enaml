@@ -1,0 +1,14 @@
+from enaml.widgets.api import *
+from enaml.layout.api import *
+
+
+
+enamldef SinteglasReportsWindow(Window):
+    title = 'Sinteglas Reports'
+    attr fig
+
+    Container:
+
+
+        MPLCanvas: canvas:
+            figure << fig

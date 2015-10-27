@@ -18,6 +18,8 @@ class SinteglasOrderController(Atom):
     count_open_delayed_orders = Int()
     count_open_ontime_orders = Int()
 
+    last_update_text = Str()
+
     def save_new_order(self, order_params):
         new_order = Order(
             created_date=self.now(),
@@ -51,6 +53,8 @@ class SinteglasOrderController(Atom):
     def load_orders(self):
         query = self.session.query(Order)
         self.orders = query.all()
+        self.last_update_text = 'Last Updated at {}'.format(
+            self.now().strftime('%d/%m/%Y %H:%M'))
 
     @observe(['orders', 'show_closed'])
     def update_visible_orders(self, change=None):
@@ -118,3 +122,11 @@ class DemoSinteglasOrderController(SinteglasOrderController):
     def mk_order(self, **kwargs):
         o = Order(**kwargs)
         self.session.add(o)
+
+    def mk_figure(self):
+        from matplotlib.figure import Figure
+
+        fig1 = Figure()
+        ax1 = fig1.add_subplot(111)
+        ax1.plot([1, 2, 3])
+        return fig1
