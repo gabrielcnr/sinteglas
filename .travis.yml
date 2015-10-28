@@ -1,0 +1,26 @@
+language: python
+sudo: required
+dist: trusty
+
+python:
+  - "2.7"
+
+virtualenv:
+  system_site_packages: true
+
+install:
+ - sudo apt-get update
+
+ # PyTest
+ - pip install -U pytest
+ - pip install -U pytest-cov
+
+ # others
+ - pip install coveralls --use-wheel
+
+script:
+ - python setup.py develop
+ - py.test sinteglas/ --cov
+
+after_success:
+ - coveralls
