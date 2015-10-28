@@ -15,6 +15,7 @@ install:
  - pip install -U pytest
  - pip install -U pytest-cov
  - pip install -r requirements.txt
+ - sudo apt-get install matplotlib
 
  # others
  - pip install coveralls --use-wheel
