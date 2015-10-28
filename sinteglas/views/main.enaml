@@ -39,7 +39,7 @@ enamldef Main(MainWindow): mw:
         GroupBox:
 
             constraints << [
-                hbox(btn_new, btn_edit, btn_delete, chk_show_closed, spacer, btn_reports,  btn_refresh),
+                hbox(btn_new, btn_edit, btn_confirm_delivery, btn_delete, chk_show_closed, spacer, btn_reports,  btn_refresh),
                 btn_new.width == btn_edit.width == btn_delete.width == btn_refresh.width, btn_refresh.width == btn_reports.width,
                 align('v_center', btn_new, btn_edit, btn_delete, chk_show_closed, btn_refresh, btn_reports),
             ]
@@ -51,9 +51,23 @@ enamldef Main(MainWindow): mw:
                     dlg.center_on_screen()
                     if dlg.exec_():
                         controller.save_new_order(dlg.order_params)
+                        controller.load_orders()
 
             PushButton: btn_edit:
                 text = 'Edit'
+                enabled << controller.selected_row is not None
+                clicked ::
+                    print 'Edit not implemented yet'
+
+            PushButton: btn_confirm_delivery:
+                text = 'Confirm Delivery'
+                enabled << controller.btn_confirm_enabled
+                clicked ::
+                    if ask_yes_no('Confirm Delivery',
+                                  'Are you sure you want to mark this order as delivered?',
+                                  parent=self):
+                        controller.confirm_delivery(controller.selected_row)
+                        controller.load_orders()
 
             PushButton: btn_delete:
                 text = 'Delete'
@@ -61,7 +75,8 @@ enamldef Main(MainWindow): mw:
                     if ask_yes_no('Delete Confirmation',
                                   'Are you sure you want to delete this order?',
                                   parent=self):
-                        print 'yeahhhhhh'
+                        controller.delete_order(controller.selected_row)
+                        controller.load_orders()
 
             CheckBox: chk_show_closed:
                 text = 'Show Closed Orders'
@@ -93,6 +108,8 @@ enamldef Main(MainWindow): mw:
                 Column('Description', 'description'),
             ]
             rows << controller.visible_orders
+
+            selected_rows >> controller.selected_rows_on_grid
 
             alternate_row_colors = True
             stretch_last_column = True

@@ -90,3 +90,21 @@ def test_counts():
     assert controller.count_closed_orders == 3
     assert controller.count_open_delayed_orders == 2
     assert controller.count_open_ontime_orders == 2
+
+
+@mock.patch('sinteglas.controller.SinteglasOrderController.now')
+def test_confirm_delivery(mock_now, controller):
+    mock_now.return_value = datetime.datetime(2015, 12, 25, 12, 22, 11)
+    order_params = controller.create_blank_order()
+    order_params.estimated_delivery_date = datetime.date(2015, 12, 31)
+    controller.save_new_order(order_params)
+    controller.load_orders()
+    [order] = controller.orders
+
+    controller.confirm_delivery(order)
+
+    [order_from_db] = controller.session.query(Order).all()
+
+    assert order_from_db.delivery_date == datetime.date(2015, 12, 25)
+
+

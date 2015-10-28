@@ -20,6 +20,11 @@ class SinteglasOrderController(Atom):
 
     last_update_text = Str()
 
+    selected_rows_on_grid = List()
+    selected_row = Value()
+
+    btn_confirm_enabled = Bool()
+
     def save_new_order(self, order_params):
         new_order = Order(
             created_date=self.now(),
@@ -56,6 +61,11 @@ class SinteglasOrderController(Atom):
         self.last_update_text = 'Last Updated at {}'.format(
             self.now().strftime('%d/%m/%Y %H:%M'))
 
+    def confirm_delivery(self, order):
+        order.delivery_date = self.now().date()
+        self.session.add(order)
+        self.session.commit()
+
     @observe(['orders', 'show_closed'])
     def update_visible_orders(self, change=None):
         if not self.show_closed:
@@ -74,6 +84,20 @@ class SinteglasOrderController(Atom):
 
         self.count_open_ontime_orders = (
             self.count_open_orders - self.count_open_delayed_orders)
+
+    @observe(['selected_rows_on_grid'])
+    def _update_selected_row(self, change=None):
+        if self.selected_rows_on_grid:
+            self.selected_row = self.selected_rows_on_grid[0]
+        else:
+            self.selected_row = None
+
+    @observe(['selected_row'])
+    def _update_btn_confirm_enabled(self, change=None):
+        if self.selected_row is not None:
+            self.btn_confirm_enabled = self.selected_row.is_open()
+        else:
+            self.btn_confirm_enabled = False
 
 
 class DemoSinteglasOrderController(SinteglasOrderController):
