@@ -1,7 +1,7 @@
 import datetime
 from sinteglas.controller import SinteglasOrderController, \
     DemoSinteglasOrderController
-from sinteglas.model import create_database_session, Order
+from sinteglas.model import create_database_session, Order, OrderParams
 import mock
 import pytest
 
@@ -108,3 +108,11 @@ def test_confirm_delivery(mock_now, controller):
     assert order_from_db.delivery_date == datetime.date(2015, 12, 25)
 
 
+def test_confirm_delivery(controller):
+    order = Order(client='foo', description='bar',
+                  estimated_delivery_date=datetime.date(2015, 12, 25))
+    order_params = controller.get_order_params(order)
+    assert isinstance(order_params, OrderParams)
+    assert order_params.client == 'foo'
+    assert order_params.description == 'bar'
+    assert order_params.estimated_delivery_date == datetime.date(2015, 12, 25)

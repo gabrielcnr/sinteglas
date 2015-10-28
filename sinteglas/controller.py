@@ -163,7 +163,7 @@ class DemoSinteglasOrderController(SinteglasOrderController):
         o = Order(**kwargs)
         self.session.add(o)
 
-    def mk_figure(self):
+    def mk_figure(self):  # pragma: no cover
         from matplotlib.figure import Figure
 
         fig1 = Figure()

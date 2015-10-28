@@ -1,6 +1,8 @@
 [run]
 branch = true
 source = sinteglas
+omit =
+    sinteglas/main.py
 
 [report]
 # Ignore missing source files, i.e. fake template-generated "files"
