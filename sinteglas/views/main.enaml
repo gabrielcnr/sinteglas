@@ -57,7 +57,12 @@ enamldef Main(MainWindow): mw:
                 text = 'Edit'
                 enabled << controller.selected_row is not None
                 clicked ::
-                    print 'Edit not implemented yet'
+                    order = controller.selected_row
+                    order_params = controller.get_order_params(order)
+                    dlg = OrderDialog(is_editing=True, title='Edit Order', order_params=order_params)
+                    if dlg.exec_():
+                        controller.apply_edit_params(order_params, order)
+                        controller.load_orders()
 
             PushButton: btn_confirm_delivery:
                 text = 'Confirm Delivery'

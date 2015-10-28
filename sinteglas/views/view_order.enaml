@@ -9,6 +9,7 @@ enamldef Field(_Field):
 
 enamldef OrderDialog(Dialog):
     attr order_params
+    attr is_editing = False
 
     title = 'New Order'
 
@@ -24,6 +25,7 @@ enamldef OrderDialog(Dialog):
                 text = 'Client'
 
             Field:
+                enabled << not is_editing
                 text := order_params.client
 
 

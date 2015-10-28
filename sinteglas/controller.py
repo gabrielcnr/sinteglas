@@ -66,6 +66,22 @@ class SinteglasOrderController(Atom):
         self.session.add(order)
         self.session.commit()
 
+    def get_order_params(self, order):
+        order_params = OrderParams(
+            client=order.client,
+            description=order.description,
+            estimated_delivery_date=order.estimated_delivery_date,
+        )
+        order_params.update_is_valid()
+        return order_params
+
+    def apply_order_params(self, order_params, order):
+        if order_params.is_valid():
+            order.description = order_params.description
+            order.estimated_delivery_date = order_params.estimated_delivery_date
+            self.session.add(order)
+            self.session.commit()
+
     @observe(['orders', 'show_closed'])
     def update_visible_orders(self, change=None):
         if not self.show_closed:
