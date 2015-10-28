@@ -14,6 +14,7 @@ install:
  # PyTest
  - pip install -U pytest
  - pip install -U pytest-cov
+ - pip install -r requirements.txt
 
  # others
  - pip install coveralls --use-wheel
