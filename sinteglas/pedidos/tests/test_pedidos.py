@@ -111,9 +111,6 @@ def test_pedido_com_dois_itens_um_deles_entregue_completo_outro_parcial():
     assert pedido.status == StatusPedido.CONCLUIDO
 
 
-
-
-
 def test_entrega_excedente():
     pedido = criar_pedido_teste()
 
@@ -139,5 +136,3 @@ def criar_pedido_teste():
         cliente='Gabriel',
     )
     return pedido
-
-

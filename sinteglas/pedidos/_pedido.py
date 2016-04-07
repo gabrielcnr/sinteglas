@@ -1,5 +1,3 @@
-PESO_ESPECIFICO_ACRILICO = 1.19
-
 from atom.api import Atom, Typed, Int, Str, Unicode, List
 import datetime
 
