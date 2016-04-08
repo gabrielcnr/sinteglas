@@ -1,6 +1,6 @@
 atom
 enaml
 sqlalchemy
-matplotlib
+pandas
 pytest
 mock
