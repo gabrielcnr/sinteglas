@@ -50,3 +50,10 @@ def test_desigualdade():
     esp2 = Especificacao(largura=70, comprimento=115, espessura=2.4)
 
     assert esp1 != esp2
+
+
+def test_from_string():
+    esp = Especificacao.from_string('110x210|5,56')
+    assert esp.largura == 110
+    assert esp.comprimento == 210
+    assert esp.espessura == 5.56

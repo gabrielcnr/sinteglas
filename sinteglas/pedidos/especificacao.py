@@ -29,3 +29,15 @@ class Especificacao(object):
         return (self.largura == other.largura and
                 self.comprimento == other.comprimento and
                 self.espessura == other.espessura)
+
+    @classmethod
+    def from_string(cls, s):
+        import re
+        res = re.findall(r'(\d+)x(\d+)\|(\d+,\d+)', s)
+        if res:
+            [(l, c, e)] = res
+            return cls(
+                largura=int(l),
+                comprimento=int(c),
+                espessura=float(e.replace(',', '.')),
+            )
