@@ -1,3 +1,6 @@
 atom
 enaml
 sqlalchemy
+matplotlib
+pytest
+mock
