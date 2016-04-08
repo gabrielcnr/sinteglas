@@ -3,7 +3,9 @@ import datetime
 import mock
 import pytest
 from sinteglas.pedidos import Pedido, StatusPedido
+from sinteglas.pedidos.especificacao import Especificacao
 
+ESPECIFICACAO = Especificacao(60, 90, 2.4)
 
 @mock.patch('sinteglas.pedidos._pedido.data_hora_atual')
 def test_criar_novo_pedido(mock_data_hora_atual):
@@ -23,21 +25,19 @@ def test_adicionar_item_de_pedido():
 
     pedido.adicionar_item(
         quantidade=10,
+        especificacao=ESPECIFICACAO,
     )
 
     assert len(pedido.itens) == 1
 
     assert pedido.itens[0].quantidade == 10
+    assert pedido.itens[0].especificacao == Especificacao(60, 90, 2.4)
 
     assert pedido.status == StatusPedido.ABERTO
 
 
 def test_adicionar_entrega_parcial():
-    pedido = criar_pedido_teste()
-
-    pedido.adicionar_item(
-        quantidade=10,
-    )
+    pedido = criar_pedido_teste(quantidades=[10])
 
     [item] = pedido.itens
 
@@ -51,11 +51,7 @@ def test_adicionar_entrega_parcial():
 
 
 def test_multiplas_entregas_item_completo():
-    pedido = criar_pedido_teste()
-
-    pedido.adicionar_item(
-        quantidade=10,
-    )
+    pedido = criar_pedido_teste(quantidades=[10])
 
     [item] = pedido.itens
 
@@ -75,15 +71,7 @@ def test_multiplas_entregas_item_completo():
 
 
 def test_pedido_com_dois_itens_um_deles_entregue_completo_outro_parcial():
-    pedido = criar_pedido_teste()
-
-    pedido.adicionar_item(
-        quantidade=10,
-    )
-
-    pedido.adicionar_item(
-        quantidade=20,
-    )
+    pedido = criar_pedido_teste(quantidades=[10, 20])
 
     [item1, item2] = pedido.itens
 
@@ -112,11 +100,7 @@ def test_pedido_com_dois_itens_um_deles_entregue_completo_outro_parcial():
 
 
 def test_entrega_excedente():
-    pedido = criar_pedido_teste()
-
-    pedido.adicionar_item(
-        quantidade=10,
-    )
+    pedido = criar_pedido_teste(quantidades=[10])
 
     [item] = pedido.itens
 
@@ -151,9 +135,26 @@ def test_observacao_pedido(mock_getuser, mock_data_hora_atual):
     assert obs.op_id == pedido.op_id
 
 
-def criar_pedido_teste():
+def test_volume_do_item_de_pedido():
+    """
+    Volume = Quantidade * Peso * 0.92
+    """
+    pedido = criar_pedido_teste(quantidades=[40])
+
+    [item] = pedido.itens
+    item.especificacao = Especificacao(70, 115, 1.0)
+
+    assert round(item.volume, 3) == round(35.253, 3)
+
+
+def criar_pedido_teste(quantidades=None):
+    quantidades = quantidades or []
+
     pedido = Pedido.criar_novo(
         op_id=123,
         cliente='Gabriel',
     )
+    for q in quantidades:
+        pedido.adicionar_item(quantidade=q, especificacao=ESPECIFICACAO)
+
     return pedido

@@ -1,6 +1,5 @@
 PESO_ESPECIFICO_ACRILICO = 1.19
 
-
 tamanhos = [(60, 90), (70, 115),
             (110, 210), (135, 185), ]
 
@@ -25,3 +24,8 @@ class Especificacao(object):
         espessura = '{:.2f}'.format(self.espessura)
         espessura = espessura.replace('.', ',')
         return '{}x{}|{}'.format(self.largura, self.comprimento, espessura)
+
+    def __eq__(self, other):
+        return (self.largura == other.largura and
+                    self.comprimento == other.comprimento and
+                    self.espessura == other.espessura)

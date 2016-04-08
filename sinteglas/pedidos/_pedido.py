@@ -3,6 +3,7 @@ import getpass
 from atom.api import Atom, Typed, Int, Str, Unicode, List
 import datetime
 
+from sinteglas.pedidos.especificacao import Especificacao
 from sinteglas.pedidos.observacao import ObservacaoPedido
 
 
@@ -25,6 +26,7 @@ class ItemPedido(Atom):
     item_id = Int()
     quantidade = Int()
     data_entrada = Typed(datetime.datetime)
+    especificacao = Typed(Especificacao)
 
     entregas = List()
 
@@ -55,6 +57,9 @@ class ItemPedido(Atom):
         else:
             return StatusPedido.PARCIAL
 
+    @property
+    def volume(self):
+        return self.quantidade * self.especificacao.peso * 0.92
 
 class Pedido(Atom):
     # Campos obrigatorios
@@ -79,9 +84,10 @@ class Pedido(Atom):
         pedido.data_entrada = data_hora_atual()
         return pedido
 
-    def adicionar_item(self, quantidade):
+    def adicionar_item(self, quantidade, especificacao):
         item = ItemPedido()
         item.quantidade = quantidade
+        item.especificacao = especificacao
         item.data_entrada = data_hora_atual()
         self.itens.append(item)
 
