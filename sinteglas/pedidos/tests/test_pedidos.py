@@ -4,6 +4,7 @@ import mock
 import pytest
 from sinteglas.pedidos import Pedido, StatusPedido
 from sinteglas.pedidos.especificacao import Especificacao
+from sinteglas.pedidos.observacao import ObservacaoItemPedido
 
 ESPECIFICACAO = Especificacao(60, 90, 2.4)
 
@@ -136,6 +137,28 @@ def test_observacao_pedido(mock_getuser, mock_data_hora_atual):
     assert obs.op_id == pedido.op_id
 
 
+@mock.patch('sinteglas.pedidos._pedido.data_hora_atual')
+@mock.patch('getpass.getuser')
+def test_observacao_no_item_de_pedido(mock_getuser, mock_data_hora_atual):
+    dt = datetime.datetime(2016, 2, 17, 20, 21)
+
+    mock_getuser.return_value = 'dunha'
+    mock_data_hora_atual.return_value = dt
+
+    pedido = criar_pedido_teste(quantidades=[5])
+    [item] = pedido.itens
+
+    item.adicionar_observacao('1,2,3 testando')
+
+    [obs] = item.observacoes
+
+    assert isinstance(obs, ObservacaoItemPedido)
+    assert obs.texto == '1,2,3 testando'
+    assert obs.autor == 'dunha'
+    assert obs.data_hora == dt
+    assert obs.item_id == item.op_id
+
+
 def test_volume_do_item_de_pedido():
     """
     Volume = Quantidade * Peso * 0.92
@@ -147,6 +170,7 @@ def test_volume_do_item_de_pedido():
 
     assert round(item.volume, 3) == round(35.253, 3)
 
+
 def test_volume_total_do_pedido():
     """
     O volume do pedido eh igual a soma dos volumes dos itens de pedido.
@@ -157,7 +181,6 @@ def test_volume_total_do_pedido():
         item.especificacao = Especificacao(70, 115, 1.0)
 
     assert round(pedido.volume_total, 3) == round(352.526, 3)
-
 
 
 def criar_pedido_teste(quantidades=None):

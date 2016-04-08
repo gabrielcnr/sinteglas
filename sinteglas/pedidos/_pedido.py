@@ -4,7 +4,7 @@ from atom.api import Atom, Typed, Int, Str, Unicode, List
 import datetime
 
 from sinteglas.pedidos.especificacao import Especificacao
-from sinteglas.pedidos.observacao import ObservacaoPedido
+from sinteglas.pedidos.observacao import ObservacaoPedido, ObservacaoItemPedido
 
 
 class StatusPedido(object):
@@ -28,7 +28,11 @@ class ItemPedido(Atom):
     data_entrada = Typed(datetime.datetime)
     especificacao = Typed(Especificacao)
 
-    entregas = List()
+    #: lista de entregas (parciais ou nao) associadas a este item de pedido
+    entregas = List(EntregaItemPedido)
+
+    #: lista de Observacoes associadas a este item de pedido
+    observacoes = List(ObservacaoItemPedido)
 
     def adicionar_entrega(self, quantidade):
         if quantidade > self.total_restante:
@@ -39,6 +43,7 @@ class ItemPedido(Atom):
             data_entrada=data_hora_atual(),
         )
         self.entregas.append(entrega)
+        return entrega
 
     @property
     def total_entregue(self):
@@ -62,6 +67,16 @@ class ItemPedido(Atom):
         # TODO: o que eh o numero magico 0.92 ? Perguntar pro Du ...
         return self.quantidade * self.especificacao.peso * 0.92
 
+    def adicionar_observacao(self, texto):
+        obs = ObservacaoItemPedido(
+            item_id=self.item_id,
+            texto=texto,
+            data_hora=data_hora_atual(),
+            autor=getpass.getuser(),
+        )
+        self.observacoes.append(obs)
+        return obs
+
 
 class Pedido(Atom):
     # Campos obrigatorios
@@ -73,10 +88,10 @@ class Pedido(Atom):
     prazo = Int()
 
     #: lista de observacoes para o pedido
-    observacoes = List()
+    observacoes = List(ObservacaoPedido)
 
     #: list de itens de pedido
-    itens = List()
+    itens = List(ItemPedido)
 
     @classmethod
     def criar_novo(cls, op_id, cliente):
@@ -92,6 +107,7 @@ class Pedido(Atom):
         item.especificacao = especificacao
         item.data_entrada = data_hora_atual()
         self.itens.append(item)
+        return item
 
     @property
     def status(self):
@@ -110,6 +126,7 @@ class Pedido(Atom):
             autor=getpass.getuser(),
         )
         self.observacoes.append(obs)
+        return obs
 
     @property
     def volume_total(self):
