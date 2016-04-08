@@ -8,7 +8,7 @@ espessuras = [1.00, 1.30, 1.60, 2.00, 2.40, 3.20, 4.00, 4.75,
               5.56, 6.35, 8.00, 10.00, 12.70, 15.90, 19.05, 25.40]
 
 
-class Medidas(object):
+class Especificacao(object):
     def __init__(self, largura, comprimento, espessura):
         assert (largura, comprimento) in tamanhos, 'tamanho (LxC) invalido'
         assert espessura in espessuras, 'espessura invalida'
