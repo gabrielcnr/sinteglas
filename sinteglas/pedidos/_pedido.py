@@ -61,6 +61,7 @@ class ItemPedido(Atom):
     def volume(self):
         return self.quantidade * self.especificacao.peso * 0.92
 
+
 class Pedido(Atom):
     # Campos obrigatorios
     op_id = Int()

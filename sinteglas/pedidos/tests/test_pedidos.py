@@ -7,6 +7,7 @@ from sinteglas.pedidos.especificacao import Especificacao
 
 ESPECIFICACAO = Especificacao(60, 90, 2.4)
 
+
 @mock.patch('sinteglas.pedidos._pedido.data_hora_atual')
 def test_criar_novo_pedido(mock_data_hora_atual):
     dt = datetime.datetime(2016, 3, 6, 11, 0)

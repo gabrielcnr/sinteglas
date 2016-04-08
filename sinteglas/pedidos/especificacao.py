@@ -27,5 +27,5 @@ class Especificacao(object):
 
     def __eq__(self, other):
         return (self.largura == other.largura and
-                    self.comprimento == other.comprimento and
-                    self.espessura == other.espessura)
+                self.comprimento == other.comprimento and
+                self.espessura == other.espessura)
