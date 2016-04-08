@@ -1,8 +1,8 @@
-import pytest
-
-from sinteglas.pedidos import Pedido, StatusPedido
 import datetime
+
 import mock
+import pytest
+from sinteglas.pedidos import Pedido, StatusPedido
 
 
 @mock.patch('sinteglas.pedidos._pedido.data_hora_atual')
@@ -128,6 +128,27 @@ def test_entrega_excedente():
         item.adicionar_entrega(
             quantidade=7
         )
+
+
+@mock.patch('sinteglas.pedidos._pedido.data_hora_atual')
+@mock.patch('getpass.getuser')
+def test_observacao_pedido(mock_getuser, mock_data_hora_atual):
+    dt = datetime.datetime(2016, 2, 17, 20, 21)
+
+    mock_getuser.return_value = 'joao'
+    mock_data_hora_atual.return_value = dt
+
+    pedido = criar_pedido_teste()
+    assert pedido.observacoes == []
+
+    pedido.adicionar_observacao('Isto eh um teste')
+
+    [obs] = pedido.observacoes
+
+    assert obs.texto == 'Isto eh um teste'
+    assert obs.autor == 'joao'
+    assert obs.data_hora == dt
+    assert obs.op_id == pedido.op_id
 
 
 def criar_pedido_teste():

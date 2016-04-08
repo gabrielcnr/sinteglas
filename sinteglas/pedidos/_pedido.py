@@ -1,5 +1,9 @@
+import getpass
+
 from atom.api import Atom, Typed, Int, Str, Unicode, List
 import datetime
+
+from sinteglas.pedidos.observacao import ObservacaoPedido
 
 
 class StatusPedido(object):
@@ -53,16 +57,19 @@ class ItemPedido(Atom):
 
 
 class Pedido(Atom):
-    # campos obrigatorios
+    # Campos obrigatorios
     op_id = Int()
     data_entrada = Typed(datetime.datetime)
     cliente = Unicode()
 
+    #: prazo de entrega
     prazo = Int()
 
-    # observacoes = List() # lista de observacoes
+    #: lista de observacoes para o pedido
+    observacoes = List()
 
-    itens = List()  # lista de items de pedido
+    #: list de itens de pedido
+    itens = List()
 
     @classmethod
     def criar_novo(cls, op_id, cliente):
@@ -86,6 +93,15 @@ class Pedido(Atom):
             concluido = all((i.status == StatusPedido.COMPLETO
                              for i in self.itens))
             return StatusPedido.CONCLUIDO if concluido else StatusPedido.ABERTO
+
+    def adicionar_observacao(self, texto):
+        obs = ObservacaoPedido(
+            op_id=self.op_id,
+            texto=texto,
+            data_hora=data_hora_atual(),
+            autor=getpass.getuser(),
+        )
+        self.observacoes.append(obs)
 
 
 def data_hora_atual():
