@@ -59,6 +59,7 @@ class ItemPedido(Atom):
 
     @property
     def volume(self):
+        # TODO: o que eh o numero magico 0.92 ? Perguntar pro Du ...
         return self.quantidade * self.especificacao.peso * 0.92
 
 
@@ -109,6 +110,10 @@ class Pedido(Atom):
             autor=getpass.getuser(),
         )
         self.observacoes.append(obs)
+
+    @property
+    def volume_total(self):
+        return sum((i.volume for i in self.itens), 0)
 
 
 def data_hora_atual():

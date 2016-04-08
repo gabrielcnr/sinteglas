@@ -147,6 +147,18 @@ def test_volume_do_item_de_pedido():
 
     assert round(item.volume, 3) == round(35.253, 3)
 
+def test_volume_total_do_pedido():
+    """
+    O volume do pedido eh igual a soma dos volumes dos itens de pedido.
+    """
+    pedido = criar_pedido_teste(quantidades=[40] * 10)  # 10 itens de 40
+
+    for item in pedido.itens:
+        item.especificacao = Especificacao(70, 115, 1.0)
+
+    assert round(pedido.volume_total, 3) == round(352.526, 3)
+
+
 
 def criar_pedido_teste(quantidades=None):
     quantidades = quantidades or []
