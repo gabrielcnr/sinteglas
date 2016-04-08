@@ -57,3 +57,8 @@ def test_from_string():
     assert esp.largura == 110
     assert esp.comprimento == 210
     assert esp.espessura == 5.56
+
+
+def test_from_string_invalid():
+    with pytest.raises(ValueError):
+        Especificacao.from_string('1,10x210|5,56')

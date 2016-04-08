@@ -1,3 +1,5 @@
+import re
+
 PESO_ESPECIFICO_ACRILICO = 1.19
 
 tamanhos = [(60, 90), (70, 115),
@@ -32,8 +34,7 @@ class Especificacao(object):
 
     @classmethod
     def from_string(cls, s):
-        import re
-        res = re.findall(r'(\d+)x(\d+)\|(\d+,\d+)', s)
+        res = re.findall(r'^(\d{2,3})x(\d{2,3})\|(\d{1,2},\d{1,2})$', s)
         if res:
             [(l, c, e)] = res
             return cls(
@@ -41,3 +42,5 @@ class Especificacao(object):
                 comprimento=int(c),
                 espessura=float(e.replace(',', '.')),
             )
+        else:
+            raise ValueError('especificacao invalida: {!r}'.format(s))
