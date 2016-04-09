@@ -1,20 +1,21 @@
 import enaml
 from enaml.qt.qt_application import QtApplication
-from sinteglas.controller import DemoSinteglasOrderController
-from sinteglas.model import create_database_session
+
+from sinteglas.gui.controller import PedidosController
+from sinteglas.scripts.importa_excel import importa_pedidos_do_excel
 
 with enaml.imports():
-    from sinteglas.views.main import Main
+    from sinteglas.gui.view_pedido import PedidosView
 
 
 def main():
+    pedidos = importa_pedidos_do_excel()
+    controller = PedidosController(pedidos=pedidos.values())
     app = QtApplication()
-    session = create_database_session()
-    controller = DemoSinteglasOrderController(session=session)
-    controller.populate_demo_database()
-    view = Main(controller=controller)
+    view = PedidosView(controller=controller)
     view.center_on_screen()
     view.show()
+    view.maximize()
     app.start()
 
 

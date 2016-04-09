@@ -1,0 +1,107 @@
+from enaml.widgets.api import *
+from enaml.layout.api import *
+import sinteglas
+from sinteglas.views.view_order import OrderDialog
+from sinteglas.views.reports import SinteglasReportsWindow
+from enamlext.widgets import Table, Column, ask_yes_no
+
+def format_date(dt):
+    return format_dt(dt, '%d/%m/%Y')
+
+
+def format_datetime(dt):
+    return format_dt(dt, '%d/%m/%Y %H:%M')
+
+
+def format_dt(dt, fmt):
+    if dt is not None:
+        return dt.strftime(fmt)
+    else:
+        return ''
+
+
+enamldef PedidosView(MainWindow): mw:
+    attr controller
+
+    title = 'Sinteglas %s' % sinteglas.version
+
+    initial_size = (1024, 728)
+
+    initialized ::
+        self.center_on_screen()
+
+    MenuBar:
+        pass
+
+    Container:
+        constraints << [
+            hbox(tabela_de_pedidos, tabela_de_itens_de_pedido),
+            tabela_de_pedidos.width == tabela_de_itens_de_pedido.width,
+        ]
+
+        Table: tabela_de_pedidos:
+            columns = [
+
+                Column('OP ID', 'op_id', align='center'),
+                Column('Data de Entrada', 'data_entrada',
+                       formatter=format_date, align='center'),
+                Column('Cliente', 'cliente'),
+                Column('Itens de Pedido', lambda o: len(o.itens),
+                       align='right'),
+            ]
+
+            rows << controller.pedidos
+
+            selected_rows ::
+                if len(selected_rows) == 1:
+                    controller.pedido_selecionado = selected_rows[0]
+                else:
+                    controller.pedido_selecionado = None
+
+            alternate_row_colors = True
+            stretch_last_column = True
+#            row_style_callback = row_style_callback
+
+        Table: tabela_de_itens_de_pedido:
+            columns = [
+
+#                Column('Item ID', 'item_id', align='center'),
+                Column('Quantidade', 'quantidade', align='right'),
+                Column('Especificacao', 'especificacao', align='center'),
+                Column('Peso', lambda o: o.especificacao.peso, align='right',
+                        formatter=lambda x: '%.3f' % x),
+            ]
+
+            rows << controller.itens_de_pedido
+
+#            selected_rows ::
+#                if len(selected_rows) == 1:
+#                    controller.pedido_selecionado = selected_rows[0]
+#                else:
+#                    controller.pedido_selecionado = None
+
+            alternate_row_colors = True
+            stretch_last_column = True
+#            row_style_callback = row_style_callback
+
+
+
+def row_style_callback(row, row_index, role):
+    from PyQt4.QtGui import *
+    from PyQt4.QtCore import *
+    import datetime
+    if role == Qt.ForegroundRole:
+        if row.is_open():
+            if row.estimated_delivery_date <= datetime.date.today():
+                return QColor(Qt.red)
+            else:
+                return QColor(Qt.darkGreen)
+        else:
+            if row.estimated_delivery_date < row.delivery_date:
+                return QColor(Qt.red)
+            else:
+                return QColor(Qt.darkGreen)
+
+
+enamldef Main(PedidosView):
+    pass

@@ -7,7 +7,7 @@ from sinteglas.pedidos.especificacao import Especificacao
 import pdb
 
 
-def main():
+def importa_pedidos_do_excel():
     df = pd.read_excel('/Users/gabriel/Downloads/SINTEGLAS.xlsx', header=0)
 
     corridos_index = list(df.columns).index('CORRIDOS')
@@ -52,7 +52,7 @@ def obter_pedido(pedidos, row):
 
 
 if __name__ == '__main__':
-    pedidos = main()
+    pedidos = importa_pedidos_do_excel()
     for op_id, pedido in pedidos.items():
         print 'Pedido <OP: {!r}, Cliente: {}>'.format(pedido.op_id,
                                                       pedido.cliente)
