@@ -6,6 +6,35 @@ import datetime
 from sinteglas.pedidos.especificacao import Especificacao
 from sinteglas.pedidos.observacao import ObservacaoPedido, ObservacaoItemPedido
 
+MODELOS = [
+    ('L', 'Lisas'),
+    ('F', 'Fluorescentes'),
+    ('AC', 'Acetinado'),
+    ('AC', 'Acetinada'),
+    ('P', 'Perolada'),
+    ('A', 'Abstrato'),
+    ('MZ', 'Marmorizada'),
+    ('NV', 'Nevasca'),
+    ('MTA', 'Metalizada'),
+    ('T', 'Tartaruga'),
+    ('OT', 'Olho de Tigre'),
+    ('G', 'Granito'),
+    ('B', 'Bienal'),
+    ('ID', 'India'),
+    ('TECIDO', 'Tecidos Especiais'),
+    ('FOLHAS', 'Organica '),
+    ('PL', 'Fios Pretos/Brancos'),
+    ('Pi', 'Purpurina'),
+    ('PGH', 'Holografica'),
+    ('ICED', 'Relevo'),
+    ('MP', 'Madre-Perola'),
+    ('CHF', 'Chifre'),
+    ('DF', 'Dupla-Face'),
+    ('AB', 'Asa de Borboleta'),
+    ('MR', 'Espelhadas'),
+    ('ECO', 'Efeito Madeira'),
+]
+
 
 class StatusPedido(object):
     VAZIO = 'VAZIO'
@@ -27,6 +56,8 @@ class ItemPedido(Atom):
     quantidade = Int()
     data_entrada = Typed(datetime.datetime)
     especificacao = Typed(Especificacao)
+    modelo = Unicode()
+    codigo = Unicode()
 
     #: lista de entregas (parciais ou nao) associadas a este item de pedido
     entregas = List(EntregaItemPedido)
@@ -101,10 +132,13 @@ class Pedido(Atom):
         pedido.data_entrada = data_hora_atual()
         return pedido
 
-    def adicionar_item(self, quantidade, especificacao):
+    def adicionar_item(self, quantidade, especificacao,
+                       modelo, codigo):
         item = ItemPedido()
         item.quantidade = quantidade
         item.especificacao = especificacao
+        item.modelo = modelo
+        item.codigo = codigo
         item.data_entrada = data_hora_atual()
         self.itens.append(item)
         return item

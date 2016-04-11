@@ -3,6 +3,7 @@ import datetime
 import mock
 import pytest
 from sinteglas.pedidos import Pedido, StatusPedido
+from sinteglas.pedidos._pedido import MODELOS
 from sinteglas.pedidos.especificacao import Especificacao
 from sinteglas.pedidos.observacao import ObservacaoItemPedido
 
@@ -28,6 +29,8 @@ def test_adicionar_item_de_pedido():
     pedido.adicionar_item(
         quantidade=10,
         especificacao=ESPECIFICACAO,
+        modelo=MODELOS[0][0],
+        codigo='9876',
     )
 
     assert len(pedido.itens) == 1
@@ -191,6 +194,7 @@ def criar_pedido_teste(quantidades=None):
         cliente='Gabriel',
     )
     for q in quantidades:
-        pedido.adicionar_item(quantidade=q, especificacao=ESPECIFICACAO)
+        pedido.adicionar_item(quantidade=q, especificacao=ESPECIFICACAO,
+                              modelo=MODELOS[0][0], codigo='1234')
 
     return pedido

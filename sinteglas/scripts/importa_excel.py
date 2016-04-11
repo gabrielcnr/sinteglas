@@ -24,6 +24,8 @@ def importa_pedidos_do_excel():
         item = pedido.adicionar_item(
             quantidade=int(row['QTDE']),
             especificacao=Especificacao.from_string(row['ESP x TAM'].strip()),
+            modelo=row['MOD'],
+            codigo=str(row['COD']).strip(),
         )
         if row['OK']:
             item.adicionar_entrega(int(row['OK']))

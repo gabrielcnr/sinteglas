@@ -2,8 +2,11 @@ from enaml.widgets.api import *
 from enaml.layout.api import *
 import sinteglas
 from sinteglas.views.view_order import OrderDialog
+from sinteglas.pedidos import especificacao
+from sinteglas.pedidos._pedido import MODELOS
 from sinteglas.views.reports import SinteglasReportsWindow
 from enamlext.widgets import Table, Column, ask_yes_no, ask_text
+from enaml.stdlib.fields import IntField
 
 def format_date(dt):
     return format_dt(dt, '%d/%m/%Y')
@@ -18,6 +21,61 @@ def format_dt(dt, fmt):
         return dt.strftime(fmt)
     else:
         return ''
+
+
+enamldef NovoItemPedidoDialog(Dialog):
+
+    alias quantidade: field_quantidade.value
+    alias tamanho: cbo_tamanho.selected
+    alias espessura: cbo_espessura.selected
+    alias modelo: cbo_modelo.selected
+    alias codigo: ed_codigo.text
+
+    Container:
+        Form:
+            Label:
+                text = 'Quantidade'
+            IntField: field_quantidade:
+                pass
+
+            Label:
+                text = 'Tamanho'
+            ObjectCombo: cbo_tamanho:
+                items = especificacao.tamanhos
+
+            Label:
+                text = 'Espessura'
+            ObjectCombo: cbo_espessura:
+                items = especificacao.espessuras
+
+            Label:
+                text = 'Modelo'
+            ObjectCombo: cbo_modelo:
+                items = [m[0] for m in MODELOS]
+
+            # TODO: o codigo por enquanto vai ser entrada de texto livre, mas futuramente sera validado contra a base de dados
+            Label:
+                text = 'Codigo'
+            Field: ed_codigo:
+                pass
+
+        Separator:
+            pass
+
+        Container:
+            constraints = [hbox(spacer, btn_ok, btn_cancel)]
+            PushButton: btn_ok:
+                text = 'OK'
+                enabled << bool(quantidade > 0 and codigo.strip())
+                clicked ::
+                    accept()
+
+            PushButton: btn_cancel:
+                text = 'Cancel'
+                clicked ::
+                    reject()
+
+
 
 
 enamldef PedidosView(MainWindow): mw:
@@ -37,15 +95,16 @@ enamldef PedidosView(MainWindow): mw:
         constraints << [
             hbox(tabela_de_pedidos,
                 vbox(tabela_de_itens_de_pedido,
+                     hbox(btn_novo_item_pedido, btn_entrar_quantidade_produzida),
                      gb_observacoes,),
             ),
             tabela_de_pedidos.width == tabela_de_itens_de_pedido.width,
             gb_observacoes.height == 0.5 * tabela_de_itens_de_pedido.height,
+            btn_novo_item_pedido.width == btn_entrar_quantidade_produzida.width,
         ]
 
         Table: tabela_de_pedidos:
             columns = [
-
                 Column('OP ID', 'op_id', align='center'),
                 Column('Data de Entrada', 'data_entrada',
                        formatter=format_date, align='center'),
@@ -71,10 +130,13 @@ enamldef PedidosView(MainWindow): mw:
             columns = [
 
 #                Column('Item ID', 'item_id', align='center'),
-                Column('Observacao', 'quantidade', align='right'),
+                Column('Quantidade', 'quantidade', align='right'),
+                Column('Modelo', lambda o: '%s %s' % (o.modelo, o.codigo), align='center'),
                 Column('Especificacao', 'especificacao', align='center'),
                 Column('Peso', lambda o: o.especificacao.peso, align='right',
                         formatter=lambda x: '%.3f' % x),
+                Column('Qtd.Produzida', 'total_entregue', align='right'),
+                Column('Qtd. A Produzir', 'total_restante', align='right'),
             ]
 
             rows << controller.itens_de_pedido
@@ -88,6 +150,31 @@ enamldef PedidosView(MainWindow): mw:
             alternate_row_colors = True
             stretch_last_column = True
 #            row_style_callback = row_style_callback
+
+        PushButton: btn_novo_item_pedido:
+            text = 'Novo Item de Pedido'
+            clicked ::
+                dlg = NovoItemPedidoDialog()
+                if dlg.exec_():
+                    L, C = dlg.tamanho
+                    esp = especificacao.Especificacao(largura=L, comprimento=C, espessura=dlg.espessura)
+                    controller.pedido_selecionado.adicionar_item(
+                        quantidade=dlg.quantidade,
+                        especificacao=esp,
+                        modelo=dlg.modelo,
+                        codigo=dlg.codigo,
+                    )
+
+        PushButton: btn_entrar_quantidade_produzida:
+#            enabled << controller.item_de_pedido_selecionado.
+            text = 'Entrar Quantidade Produzida'
+            clicked ::
+                quantidade = ask_text(title='Entrar Quantidade Produzida',
+                    message='Entre a quantidade produzida no campo abaixo:',
+                    parent=mw)
+                if quantidade:
+                    controller.item_de_pedido_selecionado.adicionar_entrega(
+                        int(quantidade))
 
         GroupBox: gb_observacoes:
             enabled << controller.item_de_pedido_selecionado is not None
