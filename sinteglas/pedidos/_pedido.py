@@ -9,7 +9,6 @@ from sinteglas.pedidos.observacao import ObservacaoPedido, ObservacaoItemPedido
 MODELOS = [
     ('L', 'Lisas'),
     ('F', 'Fluorescentes'),
-    ('AC', 'Acetinado'),
     ('AC', 'Acetinada'),
     ('P', 'Perolada'),
     ('A', 'Abstrato'),

@@ -5,8 +5,10 @@ from sinteglas.views.view_order import OrderDialog
 from sinteglas.pedidos import especificacao
 from sinteglas.pedidos._pedido import MODELOS
 from sinteglas.views.reports import SinteglasReportsWindow
-from enamlext.widgets import Table, Column, ask_yes_no, ask_text
+from enamlext.widgets import Table, Column, ask_yes_no, ask_text, Field
 from enaml.stdlib.fields import IntField
+from enaml.stdlib.message_box import critical
+
 
 def format_date(dt):
     return format_dt(dt, '%d/%m/%Y')
@@ -24,15 +26,26 @@ def format_dt(dt, fmt):
 
 
 enamldef NovoItemPedidoDialog(Dialog):
+    title = 'Novo Item de Pedido'
 
     alias quantidade: field_quantidade.value
     alias tamanho: cbo_tamanho.selected
     alias espessura: cbo_espessura.selected
     alias modelo: cbo_modelo.selected
     alias codigo: ed_codigo.text
+    alias op_id: lb_op_id.text
+    alias cliente: lb_cliente.text
 
     Container:
         Form:
+            Label:
+                text = 'OP ID'
+            Label: lb_op_id:
+                pass
+            Label:
+                text = 'Cliente'
+            Label: lb_cliente:
+                pass
             Label:
                 text = 'Quantidade'
             IntField: field_quantidade:
@@ -95,12 +108,11 @@ enamldef PedidosView(MainWindow): mw:
         constraints << [
             hbox(tabela_de_pedidos,
                 vbox(tabela_de_itens_de_pedido,
-                     hbox(btn_novo_item_pedido, btn_entrar_quantidade_produzida),
-                     gb_observacoes,),
+                     botoes,
+                     gb_observacoes),
             ),
             tabela_de_pedidos.width == tabela_de_itens_de_pedido.width,
             gb_observacoes.height == 0.5 * tabela_de_itens_de_pedido.height,
-            btn_novo_item_pedido.width == btn_entrar_quantidade_produzida.width,
         ]
 
         Table: tabela_de_pedidos:
@@ -151,30 +163,52 @@ enamldef PedidosView(MainWindow): mw:
             stretch_last_column = True
 #            row_style_callback = row_style_callback
 
-        PushButton: btn_novo_item_pedido:
-            text = 'Novo Item de Pedido'
-            clicked ::
-                dlg = NovoItemPedidoDialog()
-                if dlg.exec_():
-                    L, C = dlg.tamanho
-                    esp = especificacao.Especificacao(largura=L, comprimento=C, espessura=dlg.espessura)
-                    controller.pedido_selecionado.adicionar_item(
-                        quantidade=dlg.quantidade,
-                        especificacao=esp,
-                        modelo=dlg.modelo,
-                        codigo=dlg.codigo,
-                    )
+        Container: botoes:
+            padding = 0
+            constraints = [hbox(btn_novo_item_pedido,
+                                btn_entrar_quantidade_produzida),
+                           btn_novo_item_pedido.width == btn_entrar_quantidade_produzida.width]
 
-        PushButton: btn_entrar_quantidade_produzida:
-#            enabled << controller.item_de_pedido_selecionado.
-            text = 'Entrar Quantidade Produzida'
-            clicked ::
-                quantidade = ask_text(title='Entrar Quantidade Produzida',
-                    message='Entre a quantidade produzida no campo abaixo:',
-                    parent=mw)
-                if quantidade:
-                    controller.item_de_pedido_selecionado.adicionar_entrega(
-                        int(quantidade))
+            PushButton: btn_novo_item_pedido:
+                text = 'Novo Item de Pedido'
+                clicked ::
+                    dlg = NovoItemPedidoDialog(
+                        op_id=str(controller.pedido_selecionado.op_id),
+                        cliente=controller.pedido_selecionado.cliente,
+                    )
+                    if dlg.exec_():
+                        L, C = dlg.tamanho
+                        esp = especificacao.Especificacao(largura=L, comprimento=C, espessura=dlg.espessura)
+                        controller.pedido_selecionado.adicionar_item(
+                            quantidade=dlg.quantidade,
+                            especificacao=esp,
+                            modelo=dlg.modelo,
+                            codigo=dlg.codigo,
+                        )
+                        controller.pedidos = controller.pedidos[:]
+                        controller.atualizar_itens_de_pedido_para_o_pedido_selecionado()
+
+            PushButton: btn_entrar_quantidade_produzida:
+                enabled << controller.item_de_pedido_selecionado is not None
+                text = 'Entrar Quantidade Produzida'
+                clicked ::
+                    quantidade = ask_text(title='Entrar Quantidade Produzida',
+                        message='Entre a quantidade produzida no campo abaixo:',
+                        parent=mw)
+                    if quantidade:
+                        try:
+                            controller.item_de_pedido_selecionado.adicionar_entrega(
+                                int(quantidade))
+                        except RuntimeError as ex:
+                            critical(parent=mw,
+                                     title='Erro',
+                                     text=str(ex))
+                        else:
+                            pedido_selecionado = controller.pedido_selecionado
+                            item_selecionado = controller.item_de_pedido_selecionado
+                            controller.pedido_selecionado = None
+                            controller.pedido_selecionado = pedido_selecionado
+                            controller.item_de_pedido_selecionado = item_selecionado
 
         GroupBox: gb_observacoes:
             enabled << controller.item_de_pedido_selecionado is not None

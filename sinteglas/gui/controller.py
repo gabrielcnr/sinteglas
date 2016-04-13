@@ -30,3 +30,4 @@ class PedidosController(Atom):
         else:
             self.observacoes_do_item_de_pedido_selecionado = []
 
+
