@@ -1,3 +1,5 @@
+import getpass
+
 from atom.api import Atom, List, Typed, observe
 
 from sinteglas.pedidos import Pedido
@@ -26,8 +28,12 @@ class PedidosController(Atom):
     @observe('item_de_pedido_selecionado')
     def atualizar_observacoes_do_item_de_pedido_selecionado(self, change=None):
         if self.item_de_pedido_selecionado:
-            self.observacoes_do_item_de_pedido_selecionado = self.item_de_pedido_selecionado.observacoes
+            self.observacoes_do_item_de_pedido_selecionado = self.item_de_pedido_selecionado.observacoes[:]
         else:
             self.observacoes_do_item_de_pedido_selecionado = []
 
+    def adicionar_observacao_ao_item_de_pedido_selecionado(self, obs):
+        autor = getpass.getuser()
+        self.item_de_pedido_selecionado.adicionar_observacao(obs, autor)
+        self.atualizar_observacoes_do_item_de_pedido_selecionado()
 

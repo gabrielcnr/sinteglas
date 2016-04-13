@@ -97,12 +97,12 @@ class ItemPedido(Atom):
         # TODO: o que eh o numero magico 0.92 ? Perguntar pro Du ...
         return self.quantidade * self.especificacao.peso * 0.92
 
-    def adicionar_observacao(self, texto):
+    def adicionar_observacao(self, texto, autor=None):
         obs = ObservacaoItemPedido(
             item_id=self.item_id,
             texto=texto,
             data_hora=data_hora_atual(),
-            autor=getpass.getuser(),
+            autor=autor or getpass.getuser(),
         )
         self.observacoes.append(obs)
         return obs

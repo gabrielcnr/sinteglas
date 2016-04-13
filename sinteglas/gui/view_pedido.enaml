@@ -106,7 +106,9 @@ enamldef PedidosView(MainWindow): mw:
 
     Container:
         constraints << [
-            hbox(tabela_de_pedidos,
+            hbox(
+                vbox(tabela_de_pedidos,
+                     btn_novo_pedido),
                 vbox(tabela_de_itens_de_pedido,
                      botoes,
                      gb_observacoes),
@@ -136,6 +138,11 @@ enamldef PedidosView(MainWindow): mw:
             alternate_row_colors = True
             stretch_last_column = True
 #            row_style_callback = row_style_callback
+
+        PushButton: btn_novo_pedido:
+            text = 'Novo Pedido'
+            clicked ::
+                print text
 
         Table: tabela_de_itens_de_pedido:
             enabled << controller.pedido_selecionado is not None
@@ -216,7 +223,10 @@ enamldef PedidosView(MainWindow): mw:
             Table: tabela_de_observacoes_do_item_de_pedido_selecionado:
 
                 columns = [
-                    Column('Observacoes', 'texto'),
+                    Column('Data/Hora', 'data_hora', formatter=format_datetime,
+                           align='center'),
+                    Column('Autor', 'autor'),
+                    Column('Observacao', 'texto'),
                 ]
 
                 rows << controller.observacoes_do_item_de_pedido_selecionado
@@ -231,8 +241,7 @@ enamldef PedidosView(MainWindow): mw:
                                     message='Entre com a observacao no campo abaixo:',
                                     parent=mw)
                     if text:
-                        controller.item_de_pedido_selecionado.adicionar_observacao(obs)
-
+                        controller.adicionar_observacao_ao_item_de_pedido_selecionado(obs)
 
 
 
