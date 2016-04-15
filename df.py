@@ -58,7 +58,6 @@ class Model(QAbstractTableModel):
         DefaultColumn.qt_align = align_map[DefaultColumn.align]
 
 
-
     def rowCount(self, parent=None, *args, **kwargs):
         return self.row_count
 
@@ -80,9 +79,9 @@ class Model(QAbstractTableModel):
 
 
     def headerData(self, index, orientation, role=None):
-        col = self.cols.get(index)
         if orientation == Qt.Horizontal:
             if role == Qt.DisplayRole:
+                col = self.cols.get(index)
                 if col is None:
                     return self.headers[index]
                 else:
@@ -114,7 +113,7 @@ def custom_cell_style(array, index, role):
             return RED
 
 columns = [
-    Column('FOO', 'Column 2', align='right', fmt='.2f', cell_style_callback=custom_cell_style),
+    Column('FOO', 'Column 2', align='center', fmt='.2f', cell_style_callback=custom_cell_style),
     Column('BAR', 'Column 4', align='right', fmt='.4f', cell_style_callback=custom_cell_style),
 ]
 
