@@ -91,7 +91,7 @@ class Model(QAbstractTableModel):
 
         else:
             if role == Qt.DisplayRole:
-                return index+1 # TODO: return DataFrame index
+                return str(self.df.index[index])
             elif role == Qt.TextAlignmentRole:
                 return Qt.AlignVCenter | Qt.AlignRight
             elif role == Qt.FontRole:
@@ -119,7 +119,8 @@ columns = [
 
 app = QApplication([])
 df = pd.DataFrame(np.random.rand(100000, 200),
-                  columns=['Column %d' % i for i in xrange(1, 201)])
+                  columns=['Column %d' % i for i in xrange(1, 201)],
+                  index=range(125, 100125))
 model = Model(df, columns=columns)
 view = QTableView()
 view.setAlternatingRowColors(True)
